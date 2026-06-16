@@ -64,12 +64,34 @@ Stmt {
   UseStmt |
   GrantRoleStmt |
   GrantPrivilegesStmt |
+  GrantExtendedStmt |
   CreateTableStmt |
+  CreateFunctionStmt |
+  CreateProcedureStmt |
+  CreateSchema |
+  CreateMaskingPolicy |
+  CreateGenericObjectStmt |
+  AlterStmt |
+  CallStmt |
+  DeleteStmt |
+  UpdateStmt |
+  MergeStmt |
+  SetStmt |
+  UnsetStmt |
+  BeginStmt |
+  CommentStmt |
+  RevokeRoleStmt |
+  RevokePrivilegesStmt |
+  ExecuteStmt |
+  ExplainStmt |
+  CopyFilesStmt |
   GetStmt |
+  PutStmt |
+  ListStmt |
+  RemoveStmt |
   ShowStmt |
   CopyStmt |
-  AlterViewStmt |
-  AlterTaskStmt
+  UndropStmt
 
 }
 
@@ -81,6 +103,8 @@ DropStmt {
   Drop (Function | Procedure) ObjName UdfTypeSig |
 
   Drop DropTargetWithIfExists IfExists? ObjName |
+
+  Drop DropTargetAdditional IfExists? ObjName DropOptions? |
 
   Drop DropTargetWithOptions IfExists? ObjName DropOptions?
 
@@ -123,6 +147,73 @@ DropTargetWithOptions {
   Sequence |
   Schema 
   
+}
+
+
+DropTargetAdditional {
+
+  Account |
+  Agent |
+  Aggregation Policy |
+  Alert |
+  Application |
+  Application Package |
+  Application Role |
+  Authentication Policy |
+  Backup Policy |
+  Backup Set |
+  Catalog Integration |
+  Compute Pool |
+  Contact |
+  Cortex Search Service |
+  Database Role |
+  Dataset |
+  Dbt Project |
+  DCM Project |
+  Dynamic Table |
+  Event Table |
+  Experiment |
+  External Agent |
+  External Access Integration |
+  External Volume |
+  Failover Group |
+  Feature Policy |
+  Gateway |
+  Git Repository |
+  Hybrid Table |
+  Iceberg Table |
+  Image Repository |
+  Index |
+  Interactive Table |
+  Join Policy |
+  Listing |
+  Maintenance Policy |
+  MCP Server |
+  Model |
+  Model Monitor |
+  Network Rule |
+  Notebook |
+  Online Feature Table |
+  Organization Profile |
+  Organization User |
+  Organization User Group |
+  Packages Policy |
+  Password Policy |
+  Postgres Instance |
+  Privacy Policy |
+  Projection Policy |
+  Replication Group |
+  Secret |
+  Semantic View |
+  Service |
+  Session Policy |
+  Snapshot |
+  Snapshot Policy |
+  Snapshot Set |
+  Storage Lifecycle Policy |
+  Streamlit |
+  Type
+
 }
 
 
@@ -256,8 +347,811 @@ UseStmt {
   Use ObjName | 
   Use Schema ObjName | 
   Use Database ObjName | 
-  Use Warehouse ObjName | 
-  Use Role ObjName
+  Use Warehouse ObjName |
+  Use Role ObjName |
+  Use Secondary Roles (All | None)
+
+}
+
+
+BeginStmt {
+
+  Begin (Work | Transaction)?
+
+}
+
+
+CallStmt {
+
+  Call ObjName Lparen CallArgList? Rparen (Into BindVariable)?
+
+}
+
+
+CallArgList {
+
+  CallArg (Comma CallArg)*
+
+}
+
+
+CallArg {
+
+  (IdentifierExt Darw)? (ScalarExpression | QueryStatementExpression)
+
+}
+
+
+SetStmt {
+
+  Set SetAssignment |
+  Set Lparen SetVariableList Rparen Eql Lparen SetExpressionList Rparen
+
+}
+
+
+SetAssignment {
+
+  SetVariable Eql ScalarExpression
+
+}
+
+
+SetVariableList {
+
+  SetVariable (Comma SetVariable)*
+
+}
+
+
+SetVariable {
+
+  IdentifierExt |
+  SessionVariableIdentifier
+
+}
+
+
+SetExpressionList {
+
+  ScalarExpression (Comma ScalarExpression)*
+
+}
+
+
+UnsetStmt {
+
+  Unset SetVariable |
+  Unset Lparen SetVariableList Rparen
+
+}
+
+
+DeleteStmt {
+
+  Delete From ObjName DeleteUsingClause? WhereClause?
+
+}
+
+
+DeleteUsingClause {
+
+  Using DeleteUsingSource (Comma DeleteUsingSource)*
+
+}
+
+
+DeleteUsingSource {
+
+  ObjName AliasClause? |
+  ParenSelect AliasClause?
+
+}
+
+
+UpdateStmt {
+
+  Update ObjName AliasClause?
+  Set UpdateAssignmentList
+  UpdateFromClause?
+  WhereClause?
+
+}
+
+
+UpdateAssignmentList {
+
+  UpdateAssignment (Comma UpdateAssignment)*
+
+}
+
+
+UpdateAssignment {
+
+  AssignmentTarget Eql ScalarExpression
+
+}
+
+
+UpdateFromClause {
+
+  From FromExpression (Comma FromExpression)*
+
+}
+
+
+MergeStmt {
+
+  Merge Into ObjName AliasClause?
+  Using MergeSource
+  On ScalarExpression
+  MergeClause+
+
+}
+
+
+MergeSource {
+
+  ObjName AliasClause? |
+  ParenSelect AliasClause?
+
+}
+
+
+MergeClause {
+
+  MergeMatchedClause |
+  MergeNotMatchedClause
+
+}
+
+
+MergeMatchedClause {
+
+  When Matched (And ScalarExpression)?
+  Then (MergeUpdateClause | Delete)
+
+}
+
+
+MergeNotMatchedClause {
+
+  When Not Matched (And ScalarExpression)?
+  Then MergeInsertClause
+
+}
+
+
+MergeUpdateClause {
+
+  Update (All By Name | Set MergeAssignmentList)
+
+}
+
+
+MergeAssignmentList {
+
+  MergeAssignment (Comma MergeAssignment)*
+
+}
+
+
+MergeAssignment {
+
+  AssignmentTarget Eql ScalarExpression
+
+}
+
+
+AssignmentTarget {
+
+  IdentifierExt (Dot IdentifierExt)*
+
+}
+
+
+MergeInsertClause {
+
+  Insert (
+    All By Name |
+    (Lparen ColumnNameList Rparen)? Values ValueList
+  )
+
+}
+
+
+GrantExtendedStmt {
+
+  Grant Database Role ObjName (Comma ObjName)* To (Role | Database Role | User | Share) ObjName |
+  Grant Application Role ObjName (Comma ObjName)* To (Role | Application Role | Application | User) ObjName |
+  Grant Service Role ObjName (Comma ObjName)* To (Role | Application Role | Database Role) ObjName |
+  Grant Caller GenericCommandTail
+
+}
+
+
+RevokeRoleStmt {
+
+  Revoke Role ObjName (Comma ObjName)* From (Role | User) ObjName |
+  Revoke Database Role ObjName (Comma ObjName)* From (Role | Database Role | User | Share) ObjName |
+  Revoke Application Role ObjName (Comma ObjName)* From (Role | Application Role | Application | User) ObjName |
+  Revoke Service Role ObjName (Comma ObjName)* From (Role | Application Role | Database Role) ObjName |
+  Revoke Caller GenericCommandTail
+
+}
+
+
+RevokePrivilegesStmt {
+
+  Revoke (Grant Option For)?
+  (PrivilegePrefix PrivilegeSuffix?) (Comma PrivilegePrefix PrivilegeSuffix?)*
+  On PrivilegeObj From (Share | Role | User | Application | Application Role)? ObjName DropOptions?
+
+}
+
+
+CommentStmt {
+
+  Comment On SnowflakeObjectType ObjName Is (StringLiteral | Null)
+
+}
+
+
+ExplainStmt {
+
+  Explain (Using (Text | Tabular | Json))? Stmt
+
+}
+
+
+ExecuteStmt {
+
+  Execute Immediate ExecuteImmediateTarget (Using Lparen SetExpressionList Rparen)? |
+  Execute Immediate From URLDefinition GenericCommandTail? |
+  Execute (Alert | Task | Notebook | Notebook Project | Dbt Project | DCM Project | Job Service) ObjName GenericCommandTail?
+
+}
+
+
+ExecuteImmediateTarget {
+
+  StringLiteral |
+  BindVariable |
+  SessionVariableIdentifier |
+  ObjName
+
+}
+
+
+CopyFilesStmt {
+
+  Copy Files Into URLDefinition From URLDefinition GenericCommandTail?
+
+}
+
+
+PutStmt {
+
+  Put URLDefinition URLDefinition WithProvision?
+
+}
+
+
+ListStmt {
+
+  List URLDefinition (Pattern Eql StringLiteral)?
+
+}
+
+
+RemoveStmt {
+
+  Remove URLDefinition (Pattern Eql StringLiteral)?
+
+}
+
+
+UndropStmt {
+
+  Undrop UndropTarget ObjName
+
+}
+
+
+UndropTarget {
+
+  Account |
+  Database |
+  Dynamic Table |
+  External Volume |
+  Iceberg Table |
+  Notebook |
+  Schema |
+  Snapshot |
+  Streamlit |
+  Table |
+  Tag |
+  Type
+
+}
+
+
+CreateGenericObjectStmt {
+
+  Create (Or Alter)? OptOrReplace? GenericCreateObjectType IfNotExists? ObjName CreateGenericClause*
+
+}
+
+
+CreateGenericClause {
+
+  CloneProvision |
+  As QueryStatementExpression |
+  As StringLiteral |
+  From ObjName |
+  From URLDefinition |
+  On ObjName |
+  WithProvision |
+  GenericCommandTail
+
+}
+
+
+GenericCreateObjectType {
+
+  Agent |
+  Aggregation Policy |
+  Alert |
+  Application |
+  Application Package |
+  Application Role |
+  Authentication Policy |
+  Backup Policy |
+  Backup Set |
+  Catalog Integration |
+  Compute Pool |
+  Contact |
+  Cortex Search Service |
+  Database Role |
+  Dataset |
+  Dbt Project |
+  DCM Project |
+  Dynamic Table |
+  Event Table |
+  Experiment |
+  External Agent |
+  External Access Integration |
+  External Function |
+  External Table |
+  External Volume |
+  Failover Group |
+  Feature Policy |
+  File Format |
+  Gateway |
+  Git Repository |
+  Hybrid Table |
+  Iceberg Table |
+  Image Repository |
+  Index |
+  Interactive Table |
+  Interactive Warehouse |
+  Join Policy |
+  Listing |
+  Maintenance Policy |
+  MCP Server |
+  Model |
+  Model Monitor |
+  Network Rule |
+  Notebook |
+  Notebook Project |
+  Online Feature Table |
+  Organization Account |
+  Organization Listing |
+  Organization Profile |
+  Organization User |
+  Organization User Group |
+  Packages Policy |
+  Password Policy |
+  Postgres Instance |
+  Privacy Policy |
+  Projection Policy |
+  Replication Group |
+  Secret |
+  Semantic View |
+  Sequence |
+  Service |
+  Session Policy |
+  Snapshot |
+  Snapshot Policy |
+  Snapshot Set |
+  Stage |
+  Storage Lifecycle Policy |
+  Streamlit |
+  Tag |
+  Type |
+  User |
+  Warehouse
+
+}
+
+
+AlterStmt {
+
+  Alter Account AlterObjectAction |
+  Alter Session AlterSessionAction |
+  Alter Warehouse IfExists? ObjName? AlterWarehouseAction |
+  Alter Table IfExists? ObjName AlterTableAction |
+  Alter View IfExists? ObjName AlterViewAction |
+  Alter Task IfExists? ObjName AlterTaskAction |
+  Alter (Function | Procedure) ObjName UdfTypeSig AlterObjectAction |
+  Alter GenericAlterObjectType IfExists? ObjName AlterObjectAction
+
+}
+
+
+GenericAlterObjectType {
+
+  Agent |
+  Aggregation Policy |
+  Alert |
+  API Integration |
+  Application |
+  Application Package |
+  Application Role |
+  Authentication Policy |
+  Backup Policy |
+  Backup Set |
+  Catalog Integration |
+  Compute Pool |
+  Connection |
+  Contact |
+  Cortex Search Service |
+  Database |
+  Database Role |
+  Dataset |
+  Dbt Project |
+  DCM Project |
+  Dynamic Table |
+  External Agent |
+  External Access Integration |
+  External Table |
+  External Volume |
+  Failover Group |
+  Feature Policy |
+  File Format |
+  Gateway |
+  Git Repository |
+  Iceberg Table |
+  Integration |
+  Join Policy |
+  Listing |
+  Maintenance Policy |
+  Masking Policy |
+  Materialized View |
+  Model |
+  Model Monitor |
+  Network Policy |
+  Network Rule |
+  Notebook |
+  Notification Integration |
+  Openflow Data Plane Integration |
+  Online Feature Table |
+  Organization Account |
+  Organization Profile |
+  Organization User |
+  Organization User Group |
+  Packages Policy |
+  Password Policy |
+  Pipe |
+  Postgres Instance |
+  Privacy Policy |
+  Projection Policy |
+  Replication Group |
+  Resource Monitor |
+  Role |
+  Row Access Policy |
+  Schema |
+  Secret |
+  Security Integration |
+  Semantic View |
+  Sequence |
+  Service |
+  Session Policy |
+  Share |
+  Snapshot |
+  Snapshot Policy |
+  Snapshot Set |
+  Stage |
+  Storage Integration |
+  Storage Lifecycle Policy |
+  Stream |
+  Streamlit |
+  Tag |
+  Type |
+  User
+
+}
+
+
+AlterSessionAction {
+
+  Set PropsList |
+  Unset KeyNameList |
+  GenericCommandTail
+
+}
+
+
+AlterWarehouseAction {
+
+  Suspend |
+  Resume (If Suspended)? |
+  Enable |
+  Disable |
+  Abort All Queries |
+  Rename To ObjName |
+  Set PropsList |
+  Set Tag TagValuePairsList |
+  Unset Tag TagNamesList |
+  Unset KeyNameList |
+  GenericCommandTail
+
+}
+
+
+AlterTableAction {
+
+  Rename To ObjName |
+  Swap With ObjName |
+  Set PropsList |
+  Set Tag TagValuePairsList |
+  Unset Tag TagNamesList |
+  Unset KeyNameList |
+  Cluster By Lparen ScalarExpression (Comma ScalarExpression)* Rparen |
+  Add Column? IfNotExists? ColumnDef |
+  Rename Column IdentifierExt To IdentifierExt |
+  Drop Column? IfExists? ColumnNameOnlyList |
+  (Alter | Modify) Column? AlterColumnDefinition |
+  GenericCommandTail
+
+}
+
+
+AlterViewAction {
+
+  Rename To ObjName |
+  Set (Comment Eql StringLiteral | Secure) |
+  Unset Comment |
+  GenericCommandTail
+
+}
+
+
+AlterTaskAction {
+
+  Suspend |
+  Resume |
+  Set PropsList |
+  Unset KeyNameList |
+  GenericCommandTail
+
+}
+
+
+AlterObjectAction {
+
+  Rename To ObjName |
+  Set PropsList |
+  Set Tag TagValuePairsList |
+  Unset Tag TagNamesList |
+  Unset KeyNameList |
+  Suspend |
+  Resume |
+  GenericCommandTail
+
+}
+
+
+ColumnDef {
+
+  IdentifierExt Types ColumnDefOption*
+
+}
+
+
+ColumnDefOption {
+
+  Default ScalarExpression |
+  Not Null |
+  CommentClause |
+  Collate StringLiteral |
+  Autoincrement |
+  Identity |
+  InlineTableConstraint
+
+}
+
+
+InlineTableConstraint {
+
+  (Constraint IdentifierExt)?
+  (
+    Unique |
+    Primary Key |
+    References ObjName (Lparen IdentifierExt Rparen)?
+  )
+  TableConstraintProperties*
+
+}
+
+
+AlterColumnDefinition {
+
+  Lparen AlterColumnSpec (Comma AlterColumnSpec)* Rparen |
+  AlterColumnSpec
+
+}
+
+
+AlterColumnSpec {
+
+  Column? IdentifierExt AlterColumnAction
+
+}
+
+
+AlterColumnAction {
+
+  Drop Default |
+  Set Default ScalarExpression |
+  Set? Not Null |
+  Drop Not Null |
+  Comment StringLiteral |
+  Unset Comment |
+  Type? Types
+
+}
+
+
+SnowflakeObjectType {
+
+  GenericCreateObjectType |
+  GenericAlterObjectType |
+  Account |
+  Database |
+  External? Table |
+  Function |
+  Managed Account |
+  Materialized? View |
+  Procedure |
+  Resource Monitor |
+  Role |
+  Schema |
+  Share |
+  Stream |
+  Task
+
+}
+
+
+GenericCommandTail {
+
+  GenericCommandAtom+
+
+}
+
+
+GenericCommandAtom {
+
+  IdentifierExt |
+  GenericCommandKeyword |
+  StringLiteral |
+  NumberLiteral |
+  IntegerLiteral |
+  BooleanValue |
+  BindVariable |
+  URLIdentifier |
+  Lparen GenericCommandTail? Rparen |
+  Lsqr GenericCommandTail? Rsqr |
+  Eql |
+  Darw |
+  Comma |
+  Dot |
+  Star |
+  Plus |
+  Minus |
+  Divide |
+  Mod |
+  Colon |
+  Dcolon |
+  Arr |
+  Gtr |
+  Lss |
+  Gte |
+  Lte |
+  Neq
+
+}
+
+
+GenericCommandKeyword {
+
+  Account |
+  Action |
+  Add |
+  After |
+  All |
+  Alter |
+  And |
+  Application |
+  As |
+  At |
+  Before |
+  By |
+  Cascade |
+  Clone |
+  Cluster |
+  Column |
+  Columns |
+  Comment |
+  Copy |
+  Create |
+  Data |
+  Database |
+  Default |
+  Delete |
+  Drop |
+  Enable |
+  Enabled |
+  Execute |
+  External |
+  File |
+  Format |
+  From |
+  Grants |
+  If |
+  In |
+  Integration |
+  Is |
+  Key |
+  Language |
+  Like |
+  Managed |
+  Masking |
+  Monitor |
+  Name |
+  Network |
+  No |
+  Not |
+  Null |
+  Of |
+  On |
+  Or |
+  Owner |
+  Policy |
+  Rename |
+  Replace |
+  Resume |
+  Role |
+  Row |
+  Schema |
+  Search |
+  Secure |
+  Set |
+  Share |
+  Stream |
+  Table |
+  Tag |
+  Task |
+  To |
+  Type |
+  Unset |
+  Usage |
+  User |
+  Using |
+  Warehouse |
+  With |
+  Without
 
 }
 
@@ -294,11 +1188,187 @@ ShowLimitClause  {
 
 ShowStmt {
 
-  Show Terse? (Tasks | Views) (Like StringLiteral)? ShowInClause? (Starts With StringLiteral)? ShowLimitClause? |
+  Show Terse? ShowObjectType ShowQualifier* |
 
-  Show Terse? (Tables|Schemas) History? (Like StringLiteral)? ShowInClause? (Starts With StringLiteral)? ShowLimitClause? |
+  Show Grants ShowGrantScope? |
 
-  Show Pipes (Like StringLiteral)? ShowInClause?
+  Show Parameters ShowQualifier* |
+
+  Show Columns ShowQualifier*
+
+}
+
+
+ShowQualifier {
+
+  History |
+  Like StringLiteral |
+  ShowInClause |
+  Starts With StringLiteral |
+  ShowLimitClause |
+  For ObjName |
+  On ObjName |
+  In SnowflakeObjectType ObjName |
+  GenericCommandTail
+
+}
+
+
+ShowGrantScope {
+
+  On SnowflakeObjectType ObjName |
+  To (Role | Database Role | Application Role | User | Share | Application) ObjName |
+  Of (Role | Database Role | Application Role | User | Share | Application) ObjName |
+  By (Role | Database Role | Application Role | User | Share | Application) ObjName |
+  In (Account | Database ObjName | Schema ObjName | Application ObjName)
+
+}
+
+
+ShowObjectType {
+
+  Accounts |
+  Agents |
+  Aggregation Policies |
+  Alerts |
+  Application Packages |
+  Application Roles |
+  Applications |
+  Authentication Policies |
+  Available Listings |
+  Available Offers |
+  Available Organization Profiles |
+  Backup Policies |
+  Backup Sets |
+  Backups |
+  Caller Grants |
+  Catalog Integrations |
+  Channels |
+  Classes |
+  Columns |
+  Compute Pool Instance Families |
+  Compute Pools |
+  Configurations |
+  Connections |
+  Contacts |
+  Cortex Search Services |
+  Data Metric Functions |
+  Database Roles |
+  Databases |
+  Datasets |
+  Dbt Projects |
+  DCM Projects |
+  Delegated Authorizations |
+  Deployments |
+  Dynamic Tables |
+  Endpoints |
+  Entities |
+  Event Tables |
+  Experiments |
+  External Agents |
+  External Functions |
+  External Tables |
+  External Volumes |
+  Failover Groups |
+  Feature Policies |
+  File Formats |
+  Functions |
+  Gateways |
+  Git Branches |
+  Git Repositories |
+  Git Tags |
+  Global Accounts |
+  Grants |
+  Hybrid Tables |
+  Iceberg Tables |
+  Image Repositories |
+  Images |
+  Indexes |
+  Integrations |
+  Join Policies |
+  Listings |
+  Locks |
+  Maintenance Policies |
+  Managed Accounts |
+  Masking Policies |
+  Materialized Views |
+  MCP Servers |
+  MFA Methods |
+  Model Monitors |
+  Models |
+  Network Policies |
+  Network Rules |
+  Notebook Projects |
+  Notebooks |
+  Notification Integrations |
+  Objects |
+  Offers |
+  Openflow Data Plane Integrations |
+  Online Feature Tables |
+  Organization Accounts |
+  Organization Profiles |
+  Organization User Groups |
+  Organization Users |
+  Packages Policies |
+  Parameters |
+  Password Policies |
+  Pipes |
+  Postgres Instances |
+  Pricing Plans |
+  Primary Keys |
+  Privacy Policies |
+  Privileges |
+  Procedures |
+  Projection Policies |
+  References |
+  Regions |
+  Release Channels |
+  Release Directives |
+  Replication Accounts |
+  Replication Databases |
+  Replication Groups |
+  Resource Monitors |
+  Roles |
+  Row Access Policies |
+  Runs |
+  Schemas |
+  Secrets |
+  Semantic Dimensions |
+  Semantic Facts |
+  Semantic Metrics |
+  Semantic Views |
+  Sequences |
+  Service Containers |
+  Service Instances |
+  Service Roles |
+  Service Volumes |
+  Services |
+  Session Policies |
+  Shared Content |
+  Shares |
+  Snapshot Policies |
+  Snapshot Sets |
+  Snapshots |
+  Specifications |
+  Stages |
+  Storage Lifecycle Policies |
+  Streamlits |
+  Streams |
+  Tables |
+  Tags |
+  Tasks |
+  Telemetry Event Definitions |
+  Transactions |
+  Types |
+  User Functions |
+  User Procedures |
+  User Programmatic Access Tokens |
+  Users |
+  Variables |
+  Versions |
+  Views |
+  Warehouses |
+  Workspaces
 
 }
 
@@ -384,9 +1454,9 @@ SelectBase {
   
   (Into ObjName)? FromClause? WhereClause? 
   
-  GroupByClause? OrderByClause? LimitClause?
+  GroupByClause? HavingClause? QualifyClause? ConnectByClause?
   
-  HavingClause? QualifyClause? ConnectByClause? |
+  OrderByClause? LimitClause? ForUpdateClause? |
 
   SelectClause !union Union (All|Distinct)? SelectClause |
 
@@ -743,8 +1813,39 @@ ParenthesizedFromExpression {
 
 SelectTarget {
 
-  (IdentifierExt Dot)? Star |
+  (IdentifierExt Dot)? Star StarModifier* |
   (Connect_by_root? ScalarExpression) (As? IdentifierExt)?
+
+}
+
+
+StarModifier {
+
+  Ilike StringLiteral |
+  Exclude (IdentifierExt | Lparen ColumnNameOnlyList Rparen) |
+  Replace Lparen StarReplaceItem (Comma StarReplaceItem)* Rparen |
+  Rename (StarRenameItem | Lparen StarRenameItem (Comma StarRenameItem)* Rparen)
+
+}
+
+
+StarReplaceItem {
+
+  ScalarExpression As IdentifierExt
+
+}
+
+
+StarRenameItem {
+
+  IdentifierExt As IdentifierExt
+
+}
+
+
+ForUpdateClause {
+
+  For Update
 
 }
 
@@ -896,7 +1997,7 @@ CreateRowAccessPolicy {
 CreateSchema {
 
   Create OptOrReplace? (Transient)? Schema IfNotExists? Identifier  
-  (Clone Identifier ((At | Before) ((Timestamp Eqa Identifier | Offset Eqa Identifier | Statement Eqa Identifier)))?)?
+  (Clone Identifier ((At | Before) ((Timestamp Eql Identifier | Offset Eql Identifier | Statement Eql Identifier)))?)?
   (With Managed Access)?
   (Data_retention_time_in_days Eql Identifier)?
   (Max_data_extension_time_in_days Eql Identifier)?
@@ -1497,10 +2598,14 @@ OptOrReplace {
 DescribeStmt {
   
   (Describe | Desc) DescribeTargetSimple ObjName |
+
+  (Describe | Desc) DescribeTargetAdditional ObjName |
   
   (Describe | Desc) External? Table ObjName (Type Eql (Columns | Stage))? |
 
-  (Describe | Desc) (Function | Procedure) Identifier UdfSig 
+  (Describe | Desc) (Function | Procedure) Identifier UdfSig |
+
+  (Describe | Desc) Result (Last_query_id Lparen Rparen | StringLiteral | BindVariable)
 
 }
 
@@ -1518,6 +2623,66 @@ DescribeTargetSimple {
   Stream |
   Task |
   User
+
+}
+
+
+DescribeTargetAdditional {
+
+  Agent |
+  Aggregation Policy |
+  Alert |
+  Application |
+  Application Package |
+  Authentication Policy |
+  Available Listing |
+  Available Organization Profile |
+  Backup Policy |
+  Backup Set |
+  Catalog Integration |
+  Compute Pool |
+  Configuration |
+  Cortex Search Service |
+  Database |
+  Dbt Project |
+  DCM Project |
+  Dynamic Table |
+  Event Table |
+  External Agent |
+  External Volume |
+  Feature Policy |
+  Gateway |
+  Git Repository |
+  Iceberg Table |
+  Join Policy |
+  Listing |
+  Maintenance Policy |
+  MCP Server |
+  Model Monitor |
+  Network Rule |
+  Notebook |
+  Openflow Data Plane Integration |
+  Online Feature Table |
+  Organization Profile |
+  Packages Policy |
+  Password Policy |
+  Postgres Instance |
+  Privacy Policy |
+  Projection Policy |
+  Result |
+  Search Optimization |
+  Secret |
+  Semantic View |
+  Service |
+  Snapshot |
+  Snapshot Policy |
+  Snapshot Set |
+  Specification |
+  Storage Lifecycle Policy |
+  Streamlit |
+  Transaction |
+  Type |
+  Warehouse
 
 }
 
@@ -1759,14 +2924,14 @@ LiteralKeyPropsList {
 
 CommitStmt {
 
-  Commit
+  Commit Work?
 
 }
 
 
 RollbackStmt {
 
-  Rollback
+  Rollback Work?
 
 }
 
@@ -2108,7 +3273,8 @@ StringType {
 
 BinaryType {
 
-  Binary (Lparen NegatableIntegerLiteral Rparen)? Varbinary
+  Binary (Lparen NegatableIntegerLiteral Rparen)? |
+  Varbinary
 
 }
 
@@ -2327,7 +3493,7 @@ EqualNegatableOperator {
 
 OperatorQuantifierClause {
 
-  (CompOperatorQuantifier)? BitwiseOrExpression
+  (CompOperatorQuantifier)? ScalarExpression
 
 }
 
@@ -2536,7 +3702,7 @@ ScalarExpressionOrList {
 
 CastExpression {
 
-  (Cast | Try_cast) Lparen ScalarExpression As Type Rparen
+  (Cast | Try_cast) Lparen ScalarExpression As Types Rparen
 
 }
 
@@ -2611,7 +3777,7 @@ OdbcEscapeAtom {
   Lcly T StringLiteral Rcly |
   Lcly Ts StringLiteral Rcly |
   Lcly Fn OdbcFunctionNameIdentifier Lparen (ScalarExpression (Comma ScalarExpression)*)? Rparen Rcly |
-  Lcly Fn Position Lparen BitwiseOrExpression  In ScalarExpression Rparen Rcly |
+  Lcly Fn Position Lparen ScalarExpression In ScalarExpression Rparen Rcly |
   Lcly Fn Extract Lparen IdentifierExt From ScalarExpression Rparen Rcly 
 
 }
@@ -2912,8 +4078,18 @@ FunctionNameIdentifier {
 
 @external extend {Identifier} extendIdentifier from "./tokens" {
 
-  Account, Action, Alter, Application, Azure, Channel, Columns, Comment, Commit, D, Data, Database, Day, Default_ddl_collation, Email, Enabled, First_name, Gcs, 
-  Hour, Identity, Ilike, Input, Integration, Key, Last_name, Left, Stage, Materialized, Month, Must_change_password, Null, Organization, Owner, Percent, Policies, 
-  Policy, Regexp, Region, Resume, Role, S3, Schema, Minute, Security, Tag, Text, Timestamp, Transient, Type, Url, User, View, Views, Warehouse, X, Year
+  Abort, Account, Accounts, Action, Add, Agent, Agents, Aggregation, Alert, Alerts, Alter, Application, Applications, Authentication, Authorizations, Available, Azure,
+  Backup, Backups, Branches, Call, Catalog, Channel, Channels, Classes, Column, Columns, Comment, Commit, Compute, Configuration, Configurations, Connections, Contact,
+  Contacts, Containers, Content, Cortex, D, Data, Database, Dataset, Datasets, Day, Dbt, DCM, Default_ddl_collation, Definitions, Delegated, Deployments, Dimensions,
+  Directives, Dynamic, Email, Enabled, Endpoints, Entities, Event, Exclude, Experiment, Experiments, Explain, Facts, Failover, Families, Feature, Files, Final,
+  First_name, Gateway, Gateways, Gcs, Git, Groups, Hour, Hybrid, Iceberg, Identity, Ilike, Image, Images, Index, Indexes, Input, Instance, Instances, Integration,
+  Interactive, Job, Key, Keys, Last_name, Last_query_id, Left, Lifecycle, Listing, Listings, Locks, Maintenance, Matched, Materialized, MCP, Merge, MFA, Methods, Metric, Metrics, Minute,
+  Model, Models, Monitors, Month, Must_change_password, Name, Network, Notebook, Notebooks, Null, Objects, Offers, Online, Openflow, Optimization, Organization,
+  Owner, Package, Packages, Parameters, Password, Pattern, Percent, Plane, Plans, Policies, Policy, Pool, Pools, Postgres, Pricing, Privacy, Profile, Profiles,
+  Programmatic, Project, Projection, Projects, Put, Queries, Regexp, Region, Regions, Release, Remove, Rename, Repositories, Repository, Result, Resume, Role,
+  Roles, Rule, Rules, Running, Runs, S3, Schema, Search, Secondary, Secret, Secrets, Security, Semantic, Server, Servers, Service, Services, Shared, Shares,
+  Snapshot, Snapshots, Specification, Specifications, Stage, Streamlit, Streamlits, Suspended, Swap, Tabular, Tag, Tags, Telemetry, Text, Timestamp, Tokens,
+  Transaction, Transactions, Transient, Type, Undrop, Unset, Url, User, Users, Val, Variables, Versions, View, Views, Volume, Volumes, Warehouse, Warehouses,
+  Work, Workspaces, X, Year
 
 }
