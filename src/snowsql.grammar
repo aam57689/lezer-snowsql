@@ -3164,8 +3164,7 @@ FormattypeoptionsXml {
 
 CopyOptions {
 
-  On_error Eql (Continue | Skip_file | Skip_file Identifier | Skip_file Identifier |
-  )
+  On_error Eql (Continue | Skip_file | Skip_file Identifier)
   Size_limit Eql Identifier Purge Eql True | False
   Return_failed_only Eql True | False
   Match_by_column_name Eql Case_sensitive | Case_insensitive | None
@@ -4084,7 +4083,7 @@ FunctionNameIdentifier {
   Directives, Dynamic, Email, Enabled, Endpoints, Entities, Event, Exclude, Experiment, Experiments, Explain, Facts, Failover, Families, Feature, Files, Final,
   First_name, Gateway, Gateways, Gcs, Git, Groups, Hour, Hybrid, Iceberg, Identity, Ilike, Image, Images, Index, Indexes, Input, Instance, Instances, Integration,
   Interactive, Job, Key, Keys, Last_name, Last_query_id, Left, Lifecycle, Listing, Listings, Locks, Maintenance, Matched, Materialized, MCP, Merge, MFA, Methods, Metric, Metrics, Minute,
-  Model, Models, Monitors, Month, Must_change_password, Name, Network, Notebook, Notebooks, Null, Objects, Offers, Online, Openflow, Optimization, Organization,
+  Model, Models, Monitors, Month, Must_change_password, Name, Notebook, Notebooks, Null, Objects, Offers, Online, Openflow, Optimization, Organization,
   Owner, Package, Packages, Parameters, Password, Pattern, Percent, Plane, Plans, Policies, Policy, Pool, Pools, Postgres, Pricing, Privacy, Profile, Profiles,
   Programmatic, Project, Projection, Projects, Put, Queries, Regexp, Region, Regions, Release, Remove, Rename, Repositories, Repository, Result, Resume, Role,
   Roles, Rule, Rules, Running, Runs, S3, Schema, Search, Secondary, Secret, Secrets, Security, Semantic, Server, Servers, Service, Services, Shared, Shares,
