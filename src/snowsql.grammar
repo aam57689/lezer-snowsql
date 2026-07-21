@@ -298,7 +298,6 @@ CreateStmt  {
   Email Eql EmailAddr (Must_change_password Eql (True | False))? Edition Eql (Standard | Enterprise | Business_critical) AccountOptional |
 
   //create clone
-  Create OptOrReplace? (Stage | File Format | Sequence) IfNotExists? Identifier Clone Identifier |
 
   //create database
   Create OptOrReplace? (Transient)? Database IfNotExists? Identifier  
@@ -376,7 +375,7 @@ CallArgList {
 
 CallArg {
 
-  (IdentifierExt Darw)? (ScalarExpression | QueryStatementExpression)
+  (IdentifierExt Darw)? ScalarExpression
 
 }
 
@@ -614,7 +613,6 @@ ExecuteImmediateTarget {
 
   StringLiteral |
   BindVariable |
-  SessionVariableIdentifier |
   ObjName
 
 }
@@ -675,20 +673,16 @@ UndropTarget {
 
 CreateGenericObjectStmt {
 
-  Create (Or Alter)? OptOrReplace? GenericCreateObjectType IfNotExists? ObjName CreateGenericClause*
-
-}
-
-
-CreateGenericClause {
-
-  CloneProvision |
-  As QueryStatementExpression |
-  As StringLiteral |
-  From ObjName |
-  From URLDefinition |
-  On ObjName |
-  WithProvision
+  // Structured-generic (Tier-2) create: a fixed-order set of optional
+  // clauses. Fixed order (rather than a repeated CreateGenericClause*)
+  // keeps the trailing AS-body's optionals from colliding with the start
+  // of a following clause, which is what made this rule ambiguous.
+  Create (Or Alter)? OptOrReplace? GenericCreateObjectType IfNotExists? ObjName
+  CloneProvision?
+  (On ObjName)?
+  (From (ObjName | URLDefinition))?
+  WithProvision?
+  (As (QueryStatementExpression | StringLiteral))?
 
 }
 
@@ -905,7 +899,7 @@ AlterTableAction {
   Add Column? IfNotExists? ColumnDef |
   Rename Column IdentifierExt To IdentifierExt |
   Drop Column? IfExists? ColumnNameOnlyList |
-  (Alter | Modify) Column? AlterColumnDefinition
+  (Alter | Modify) AlterColumnDefinition
 
 }
 
@@ -1037,7 +1031,7 @@ TimeTravelClause {
 ShowInClause {
 
   In Account |
-  In (Schema | Database)? ObjName 
+  In (Application | Table | View | Schema | Database)? ObjName
 
 }
 
@@ -1070,8 +1064,7 @@ ShowQualifier {
   Starts With StringLiteral |
   ShowLimitClause |
   For ObjName |
-  On ObjName |
-  In SnowflakeObjectType ObjName
+  On ObjName
 
 }
 
@@ -1107,7 +1100,6 @@ ShowObjectType {
   Catalog Integrations |
   Channels |
   Classes |
-  Columns |
   Compute Pool Instance Families |
   Compute Pools |
   Configurations |
@@ -1140,7 +1132,6 @@ ShowObjectType {
   Git Repositories |
   Git Tags |
   Global Accounts |
-  Grants |
   Hybrid Tables |
   Iceberg Tables |
   Image Repositories |
@@ -2318,7 +2309,6 @@ ForeignKeyDeleteUpdateRule {
 
 ConstraintDeferrableProp {
 
-  Not Deferrable |
   Deferrable
 
 }
@@ -2349,9 +2339,8 @@ BindVariable {
 
 ConstraintEnableProp {
 
-  Not Enforced | 
-  Enforced | 
-  Enable | 
+  Enforced |
+  Enable |
   Disable
 
 }
@@ -3162,18 +3151,16 @@ TimestampType {
  
   Timestampltz (Lparen NegatableIntegerLiteral Rparen)? |
   Timestamp_ltz (Lparen NegatableIntegerLiteral Rparen)? |
-  Timestamp With Local Time Zone (Lparen NegatableIntegerLiteral Rparen)? |
- 
+
   Timestampntz (Lparen NegatableIntegerLiteral Rparen)? |
   Timestamp_ntz (Lparen NegatableIntegerLiteral Rparen)? |
   Timestamp Without Time Zone (Lparen NegatableIntegerLiteral Rparen)? |
   Datetime (Lparen NegatableIntegerLiteral Rparen)? |
- 
-  Timestamptz (Lparen NegatableIntegerLiteral Rparen)? |
-  Timestamp_tz (Lparen NegatableIntegerLiteral Rparen)? |
-  Timestamp With Time Zone (Lparen NegatableIntegerLiteral Rparen)? 
 
-} 
+  Timestamptz (Lparen NegatableIntegerLiteral Rparen)? |
+  Timestamp_tz (Lparen NegatableIntegerLiteral Rparen)?
+
+}
 
 
 ArrayType {
@@ -3192,7 +3179,7 @@ ObjectType {
 
 VariantType {
 
-  Variant (With Template StringLiteral)?
+  Variant
 
 }
 
@@ -3886,7 +3873,7 @@ FunctionNameIdentifier {
 
   @precedence {URLPathComponent, StringLiteral}
 
-  @precedence {URLPathComponent, URLPath, StringLiteral}
+  @precedence {URLPathComponent, StringLiteral}
 
   @precedence {URLPathComponent, LineComment}
 
