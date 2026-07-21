@@ -21,14 +21,22 @@ This is a SnowSQL grammar for the [lezer](https://lezer.codemirror.net/) parser 
 - [x] Use Statement
 - [x] Truncate Statement
 - [x] Copy Statement
-- [ ] Select Statment
-- [ ] Alter Statements
-- [ ] Call Statement
-- [ ] Insert Statement
-- [ ] Delete Statement
-- [ ] Merge Statement
-- [ ] Set Statement
+- [x] Select Statement
+- [x] Alter Statements
+- [x] Call Statement
+- [x] Insert Statement
+- [x] Delete Statement
+- [x] Merge Statement
+- [x] Set Statement
+- [x] Show / Describe / Undrop Statements
+- [x] Generic (Tier-2) Create / Alter / Drop for the long-tail object types
 - [x] Comments - Inline + Block
+
+> **Toolchain:** built with `@lezer/generator` / `@lezer/lr` 1.x. The grammar
+> generates a **conflict-free (deterministic)** parser — a prerequisite for
+> turning parses into a stable JSON IR. See
+> [`docs/GRAMMAR_DDL_EXPANSION_PLAN.md`](docs/GRAMMAR_DDL_EXPANSION_PLAN.md)
+> for the roadmap to AST→JSON (Rego/Aspis) and provider-agnostic Terraform.
 
 # SnowSQL Grammar Expansion Notes
 
