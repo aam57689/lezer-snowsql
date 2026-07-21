@@ -206,7 +206,6 @@ DropTargetAdditional {
   Secret |
   Semantic View |
   Service |
-  Session Policy |
   Snapshot |
   Snapshot Policy |
   Snapshot Set |
@@ -564,8 +563,7 @@ GrantExtendedStmt {
 
   Grant Database Role ObjName (Comma ObjName)* To (Role | Database Role | User | Share) ObjName |
   Grant Application Role ObjName (Comma ObjName)* To (Role | Application Role | Application | User) ObjName |
-  Grant Service Role ObjName (Comma ObjName)* To (Role | Application Role | Database Role) ObjName |
-  Grant Caller GenericCommandTail
+  Grant Service Role ObjName (Comma ObjName)* To (Role | Application Role | Database Role) ObjName
 
 }
 
@@ -575,8 +573,7 @@ RevokeRoleStmt {
   Revoke Role ObjName (Comma ObjName)* From (Role | User) ObjName |
   Revoke Database Role ObjName (Comma ObjName)* From (Role | Database Role | User | Share) ObjName |
   Revoke Application Role ObjName (Comma ObjName)* From (Role | Application Role | Application | User) ObjName |
-  Revoke Service Role ObjName (Comma ObjName)* From (Role | Application Role | Database Role) ObjName |
-  Revoke Caller GenericCommandTail
+  Revoke Service Role ObjName (Comma ObjName)* From (Role | Application Role | Database Role) ObjName
 
 }
 
@@ -607,8 +604,8 @@ ExplainStmt {
 ExecuteStmt {
 
   Execute Immediate ExecuteImmediateTarget (Using Lparen SetExpressionList Rparen)? |
-  Execute Immediate From URLDefinition GenericCommandTail? |
-  Execute (Alert | Task | Notebook | Notebook Project | Dbt Project | DCM Project | Job Service) ObjName GenericCommandTail?
+  Execute Immediate From URLDefinition |
+  Execute (Alert | Task | Notebook | Notebook Project | Dbt Project | DCM Project | Job Service) ObjName
 
 }
 
@@ -625,7 +622,7 @@ ExecuteImmediateTarget {
 
 CopyFilesStmt {
 
-  Copy Files Into URLDefinition From URLDefinition GenericCommandTail?
+  Copy Files Into URLDefinition From URLDefinition PropsList?
 
 }
 
@@ -691,8 +688,7 @@ CreateGenericClause {
   From ObjName |
   From URLDefinition |
   On ObjName |
-  WithProvision |
-  GenericCommandTail
+  WithProvision
 
 }
 
@@ -876,8 +872,7 @@ GenericAlterObjectType {
 AlterSessionAction {
 
   Set PropsList |
-  Unset KeyNameList |
-  GenericCommandTail
+  Unset KeyNameList
 
 }
 
@@ -893,8 +888,7 @@ AlterWarehouseAction {
   Set PropsList |
   Set Tag TagValuePairsList |
   Unset Tag TagNamesList |
-  Unset KeyNameList |
-  GenericCommandTail
+  Unset KeyNameList
 
 }
 
@@ -911,8 +905,7 @@ AlterTableAction {
   Add Column? IfNotExists? ColumnDef |
   Rename Column IdentifierExt To IdentifierExt |
   Drop Column? IfExists? ColumnNameOnlyList |
-  (Alter | Modify) Column? AlterColumnDefinition |
-  GenericCommandTail
+  (Alter | Modify) Column? AlterColumnDefinition
 
 }
 
@@ -921,8 +914,7 @@ AlterViewAction {
 
   Rename To ObjName |
   Set (Comment Eql StringLiteral | Secure) |
-  Unset Comment |
-  GenericCommandTail
+  Unset Comment
 
 }
 
@@ -932,8 +924,7 @@ AlterTaskAction {
   Suspend |
   Resume |
   Set PropsList |
-  Unset KeyNameList |
-  GenericCommandTail
+  Unset KeyNameList
 
 }
 
@@ -946,8 +937,7 @@ AlterObjectAction {
   Unset Tag TagNamesList |
   Unset KeyNameList |
   Suspend |
-  Resume |
-  GenericCommandTail
+  Resume
 
 }
 
@@ -1015,143 +1005,16 @@ AlterColumnAction {
 
 SnowflakeObjectType {
 
-  GenericCreateObjectType |
+  // GenericAlterObjectType is the broad canonical object-type list; the
+  // entries below are the ones it does not already cover (bare Table/View
+  // rather than External Table / Materialized View, plus create-only kinds).
   GenericAlterObjectType |
   Account |
-  Database |
-  External? Table |
   Function |
   Managed Account |
-  Materialized? View |
   Procedure |
-  Resource Monitor |
-  Role |
-  Schema |
-  Share |
-  Stream |
-  Task
-
-}
-
-
-GenericCommandTail {
-
-  GenericCommandAtom+
-
-}
-
-
-GenericCommandAtom {
-
-  IdentifierExt |
-  GenericCommandKeyword |
-  StringLiteral |
-  NumberLiteral |
-  IntegerLiteral |
-  BooleanValue |
-  BindVariable |
-  URLIdentifier |
-  Lparen GenericCommandTail? Rparen |
-  Lsqr GenericCommandTail? Rsqr |
-  Eql |
-  Darw |
-  Comma |
-  Dot |
-  Star |
-  Plus |
-  Minus |
-  Divide |
-  Mod |
-  Colon |
-  Dcolon |
-  Arr |
-  Gtr |
-  Lss |
-  Gte |
-  Lte |
-  Neq
-
-}
-
-
-GenericCommandKeyword {
-
-  Account |
-  Action |
-  Add |
-  After |
-  All |
-  Alter |
-  And |
-  Application |
-  As |
-  At |
-  Before |
-  By |
-  Cascade |
-  Clone |
-  Cluster |
-  Column |
-  Columns |
-  Comment |
-  Copy |
-  Create |
-  Data |
-  Database |
-  Default |
-  Delete |
-  Drop |
-  Enable |
-  Enabled |
-  Execute |
-  External |
-  File |
-  Format |
-  From |
-  Grants |
-  If |
-  In |
-  Integration |
-  Is |
-  Key |
-  Language |
-  Like |
-  Managed |
-  Masking |
-  Monitor |
-  Name |
-  Network |
-  No |
-  Not |
-  Null |
-  Of |
-  On |
-  Or |
-  Owner |
-  Policy |
-  Rename |
-  Replace |
-  Resume |
-  Role |
-  Row |
-  Schema |
-  Search |
-  Secure |
-  Set |
-  Share |
-  Stream |
   Table |
-  Tag |
-  Task |
-  To |
-  Type |
-  Unset |
-  Usage |
-  User |
-  Using |
-  Warehouse |
-  With |
-  Without
+  View
 
 }
 
@@ -1208,8 +1071,7 @@ ShowQualifier {
   ShowLimitClause |
   For ObjName |
   On ObjName |
-  In SnowflakeObjectType ObjName |
-  GenericCommandTail
+  In SnowflakeObjectType ObjName
 
 }
 
@@ -2851,7 +2713,7 @@ InvocationPrivilegeType {
 
 Then_part {
 
-  Then (Stmt+)
+  Then (Stmt Smc+)+
 
 }
 
@@ -2887,10 +2749,10 @@ BeginEndBlock {
 BeginEndBlockWithoutLabel {
 
   Begin
-  (Stmt )+
+  (Stmt Smc+)+
   Exception_clause?
   End
-   
+
 }
 
 

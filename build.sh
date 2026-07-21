@@ -1,8 +1,6 @@
 set -ex
 
-lezer-generator src/snowsql.grammar -o src/parser
-
-cat src/parser.terms.js >> src/parser.js
+lezer-generator src/snowsql.grammar -o src/parser.js
 
 bash ./generate-types.sh
 
